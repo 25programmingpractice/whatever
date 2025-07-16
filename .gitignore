@@ -80,5 +80,6 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+cmake-*/
 # CLion generated directories
 .idea/
