@@ -1,13 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <memory>
-
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QAudioOutput>
-
-using std::unique_ptr, std::make_unique;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,7 +23,8 @@ private slots:
 
 private:
     Ui::MainWindow* ui;
-    unique_ptr<QAudioOutput> audio;
-    unique_ptr<QMediaPlayer> player;
+    QAudioOutput audio;
+    QMediaPlayer player;
 };
+
 #endif // MAINWINDOW_H

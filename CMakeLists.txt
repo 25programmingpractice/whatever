@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+enable_language(RC)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia)
@@ -23,6 +24,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(whatever
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        assets/whatever.rc
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET whatever APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -42,13 +44,21 @@ else()
     endif()
 endif()
 
-target_link_libraries(whatever PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Multimedia)
+qt_add_resources(whatever icons
+    PREFIX "/"
+    FILES assets/material-symbols-music-cast-rounded.png
+)
+
+target_link_libraries(whatever PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Multimedia
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.whatever)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.whatever)
 endif()
 set_target_properties(whatever PROPERTIES
     ${BUNDLE_ID_OPTION}
