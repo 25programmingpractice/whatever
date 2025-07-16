@@ -15,6 +15,14 @@ MainWindow::MainWindow(QWidget *parent) noexcept :
     player(make_unique<QMediaPlayer>(this))
 {
     ui->setupUi(this);
+    setCentralWidget(ui->central_widget);
+    ui->central_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    if (auto* root = ui->central_widget->layout()) {
+        root->setContentsMargins(20, 20, 20, 20);
+        root->setSpacing(10);
+        root->setSizeConstraint(QLayout::SetDefaultConstraint);
+    }
+
     player->setAudioOutput(audio.get());
     audio->setVolume(0.5f);
 
