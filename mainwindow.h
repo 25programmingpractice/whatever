@@ -23,6 +23,7 @@ public:
 private slots:
     void openFile() noexcept;
     void togglePlayback() noexcept;
+    void showAbout() noexcept;
 
 private:
     Ui::MainWindow* ui;

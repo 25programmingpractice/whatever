@@ -1,6 +1,7 @@
 #include <memory>
 
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -17,46 +18,54 @@ MainWindow::MainWindow(QWidget *parent) noexcept :
     player->setAudioOutput(audio.get());
     audio->setVolume(0.5f);
 
-    connect(ui->action_add_file, &QAction::triggered,
-            this, &MainWindow::openFile);
+    connect(ui->action_add_file, &QAction::triggered, this, &MainWindow::openFile);
+    connect(ui->action_about, &QAction::triggered, this, &MainWindow::showAbout);
 
-    connect(ui->play_pause, &QPushButton::clicked,
-            this, &MainWindow::togglePlayback);
+    connect(ui->action_exit, &QAction::triggered, this, &QApplication::quit);
 
-    connect(player.get(), &QMediaPlayer::durationChanged,
-            ui->music_progress, [this](qint64 d){
-            ui->music_progress->setRange(0, int(d));
-        });
+    connect(ui->play_pause, &QPushButton::clicked, this, &MainWindow::togglePlayback);
 
-    connect(player.get(), &QMediaPlayer::positionChanged,
-            ui->music_progress, [this](qint64 p){
-                ui->music_progress->setValue(int(p));
-            });
-    connect(ui->music_progress, &QSlider::sliderMoved,
-            player.get(), &QMediaPlayer::setPosition);
+    connect(player.get(), &QMediaPlayer::durationChanged, ui->music_progress, [this](qint64 d){
+        ui->music_progress->setRange(0, int(d));
+    });
 
-    connect(ui->volume, &QSlider::valueChanged,
-            this, [this](int v){ audio->setVolume(v / 100.0f); });
+    connect(player.get(), &QMediaPlayer::positionChanged, ui->music_progress, [this](qint64 p){
+        ui->music_progress->setValue(int(p));
+    });
+
+    connect(ui->music_progress, &QSlider::sliderMoved, player.get(), &QMediaPlayer::setPosition);
+
+    connect(ui->volume, &QSlider::valueChanged, this, [this](int v){
+        audio->setVolume(v / 100.0f);
+    });
 }
 
 void MainWindow::openFile() noexcept {
-    const QString f = QFileDialog::getOpenFileName(this, tr("Choose audio"), QDir::homePath(), tr("Audio files (*.mp3 *.flac *.aac *.wav);;All files (*)"));
+    const QString f = QFileDialog::getOpenFileName(this, tr("Choose audio"), QDir::homePath(), tr("Audio files (*.mp3 *.flac *.aac *.wav *.m4a *.ogg);;All files (*)"));
     if (!f.isEmpty()) {
         player->setSource(QUrl::fromLocalFile(f));
         player->play();
-        ui->play_pause->setText("⏸");
+        ui->play_pause->setText("暂停");
+        setWindowTitle(QFileInfo(f).fileName());
+        setWindowFilePath(f);
     }
 }
 
 void MainWindow::togglePlayback() noexcept {
     if (player->playbackState() == QMediaPlayer::PlayingState) {
         player->pause();
-        ui->play_pause->setText("▶");
+        ui->play_pause->setText("播放");
     }
     else {
         player->play();
-        ui->play_pause->setText("⏸");
+        ui->play_pause->setText("暂停");
     }
+}
+
+void MainWindow::showAbout() noexcept{
+    QMessageBox::about(this, tr("Whatever 播放器"),
+        tr("<div style='text-align: center'><h1>做点啥呢？Whatever.</h1><h3>2025 编程实训项目</h3><h3>组员：林峻茗、张峻鸣、易治行</h3></div>")
+    );
 }
 
 MainWindow::~MainWindow() {
