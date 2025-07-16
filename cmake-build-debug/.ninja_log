@@ -1,0 +1,15 @@
+# ninja log v6
+3	759	1752647488529661923	/Users/yzhbradoodrrpurp/Desktop/whatever/cmake-build-debug/whatever_autogen/timestamp	bd69004972a01e68
+3	759	1752647488529661923	whatever_autogen/mocs_compilation.cpp	bd69004972a01e68
+763	2141	1752647488549349792	CMakeFiles/whatever.dir/whatever_autogen/mocs_compilation.cpp.o	1d078e2966eaba77
+3	759	1752647488529661923	/Users/yzhbradoodrrpurp/Desktop/whatever/cmake-build-debug/whatever_autogen/mocs_compilation.cpp	bd69004972a01e68
+3	759	1752647488529661923	whatever_autogen/timestamp	bd69004972a01e68
+763	2140	1752647488549604160	CMakeFiles/whatever.dir/main.cpp.o	8d20e2a137a50d1
+7	405	1752647599359359000	whatever_autogen/timestamp	bd69004972a01e68
+7	405	1752647599359359000	whatever_autogen/mocs_compilation.cpp	bd69004972a01e68
+7	405	1752647599359359000	/Users/yzhbradoodrrpurp/Desktop/whatever/cmake-build-debug/whatever_autogen/timestamp	bd69004972a01e68
+7	405	1752647599359359000	/Users/yzhbradoodrrpurp/Desktop/whatever/cmake-build-debug/whatever_autogen/mocs_compilation.cpp	bd69004972a01e68
+405	1727	1752647599369992031	CMakeFiles/whatever.dir/main.cpp.o	8d20e2a137a50d1
+405	1732	1752647599369808785	CMakeFiles/whatever.dir/whatever_autogen/mocs_compilation.cpp.o	1d078e2966eaba77
+405	1747	1752647599370109111	CMakeFiles/whatever.dir/mainwindow.cpp.o	aa56eca99b27cb83
+1747	1958	1752647600711512523	whatever.app/Contents/MacOS/whatever	e7bbeaa8bd05eccf
