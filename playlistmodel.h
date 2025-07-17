@@ -65,6 +65,9 @@ signals:
 private:
     QList<MusicTrack> m_tracks;
     QStringList m_supportedFormats;
+    
+    // 格式化时间的辅助方法
+    QString formatDuration(qint64 milliseconds) const;
 };
 
 #endif // PLAYLISTMODEL_H

@@ -5,7 +5,7 @@
 #include "playlistmodel.h"
 
 PlaylistModel::PlaylistModel(QObject* parent) noexcept : QAbstractTableModel(parent) {
-    m_supportedFormats << "mp3" << "flac" << "aac" << "wav" << "m4a" << "ogg" << "wma";
+    m_supportedFormats << "mp3" << "flac" << "aac" << "wav" << "m4a" << "ogg" << "wma" << "mgg";
 }
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const {
@@ -25,7 +25,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const {
         case Title: return track.title;
         case Artist: return track.artist;
         case Album: return track.album;
-        case Duration: return track.duration;
+        case Duration: return formatDuration(track.duration);
         default: return QVariant();
     }
     return QVariant();
@@ -89,4 +89,14 @@ void PlaylistModel::removeTrack(int index) noexcept {
         endRemoveRows();
         emit playlistChanged();
     }
+}
+
+QString PlaylistModel::formatDuration(qint64 milliseconds) const {
+    if (milliseconds <= 0) return tr("未知");
+    
+    qint64 seconds = milliseconds / 1000;
+    qint64 minutes = seconds / 60;
+    seconds = seconds % 60;
+    
+    return tr("%1分%2秒").arg(minutes).arg(seconds, 2, 10, QChar('0'));
 }
