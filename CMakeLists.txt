@@ -8,7 +8,9 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-enable_language(RC)
+if(WIN32)
+    enable_language(RC)
+endif()
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia)
@@ -20,11 +22,15 @@ set(PROJECT_SOURCES
     mainwindow.ui
 )
 
+if(WIN32)
+    set(RC_SCRIPT "assets/whatever.rc" CACHE STRING "")
+endif()
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(whatever
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        assets/whatever.rc
+        ${RC_SCRIPT}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET whatever APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
