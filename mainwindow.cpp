@@ -191,8 +191,24 @@ void MainWindow::updatePlayingInfo() noexcept {
         const auto* file = playlistModel.getTrack(currentTrackIndex);
         ui->metadata->setText(file->artist + " - " + file->title);
         if (isLyricsView) updateLyricsDisplay();
-        if (!file->cover.isNull()) ui->album_cover->setPixmap(QPixmap::fromImage(file->cover).scaled(file->cover.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        else ui->album_cover->setPixmap(QPixmap(":/assets/material-symbols-music-cast-rounded.png"));
+        if (!file->cover.isNull()) ui->album_cover->setPixmap(QPixmap::fromImage(file->cover));
+        else {
+            bool found = false;
+            const QDir dir{QFileInfo(file->filePath).absolutePath()};
+            static const QStringList names = { "cover.jpg", "Cover.jpg", "folder.jpg", "Folder.jpg" };
+            for (const QString &n : names) {
+                const QString file_ = dir.filePath(n);
+                if (QFile::exists(file_)) {
+                    QImage img(file_);
+                    if (!img.isNull()) {
+                        ui->album_cover->setPixmap(QPixmap::fromImage(img));
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            if(!found) ui->album_cover->setPixmap(QPixmap(":/assets/material-symbols-music-cast-rounded.png"));
+        }
     }
     else {
         ui->metadata->setText("未在播放");
