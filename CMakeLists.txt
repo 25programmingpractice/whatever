@@ -54,7 +54,19 @@ endif()
 
 qt_add_resources(whatever icons
     PREFIX "/"
-    FILES assets/material-symbols-music-cast-rounded.png
+    FILES
+        assets/material-symbols-music-cast-rounded.png
+        assets/material-symbols--format-list-bulleted-rounded.png
+        assets/material-symbols--lyrics-outline-rounded.png
+        assets/material-symbols--pause-rounded.png
+        assets/material-symbols--play-arrow-rounded.png
+        assets/material-symbols--playlist-play-rounded.png
+        assets/material-symbols--repeat-one-rounded.png
+        assets/material-symbols--shuffle-rounded.png
+        assets/material-symbols--skip-next-rounded.png
+        assets/material-symbols--skip-previous-rounded.png
+        assets/material-symbols--volume-off-rounded.png
+        assets/material-symbols--volume-up-rounded.png
 )
 
 target_link_libraries(whatever PRIVATE

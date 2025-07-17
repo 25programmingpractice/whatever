@@ -37,7 +37,7 @@ private:
     Ui::MainWindow* ui;
     QAudioOutput audio;
     QMediaPlayer player;
-    PlaylistModel* playlistModel;
+    PlaylistModel playlistModel;
     int currentTrackIndex;
 };
 

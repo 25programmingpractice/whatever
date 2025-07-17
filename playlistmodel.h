@@ -7,13 +7,9 @@
 #include <QDir>
 
 struct MusicTrack {
-    QString filePath;
-    QString title;
-    QString artist;
-    QString album;
-    QString duration;
-    
-    MusicTrack(const QString& path) : filePath(path) {
+    QString filePath, title, artist, album, duration;
+
+    MusicTrack(const QString& path) noexcept : filePath(path) {
         QFileInfo fileInfo(path);
         title = fileInfo.baseName();
         artist = "未知艺术家";
@@ -34,21 +30,19 @@ public:
         ColumnCount = 4
     };
 
-    explicit PlaylistModel(QObject *parent = nullptr);
+    explicit PlaylistModel(QObject *parent = nullptr) noexcept;
 
-    // QAbstractTableModel interface
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // Playlist management
-    void addMusicFile(const QString &filePath);
-    void addMusicFolder(const QString &folderPath);
-    void clearPlaylist();
-    QString getTrackPath(int index) const;
-    int getTrackCount() const;
-    void removeTrack(int index);
+    void addMusicFile(const QString& filePath) noexcept;
+    void addMusicFolder(const QString& folderPath) noexcept;
+    void clearPlaylist() noexcept;
+    QString getTrackPath(int index) const noexcept;
+    int getTrackCount() const noexcept;
+    void removeTrack(int index) noexcept;
 
 signals:
     void playlistChanged();
