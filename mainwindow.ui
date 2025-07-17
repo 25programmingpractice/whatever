@@ -49,6 +49,12 @@
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QSlider" name="music_progress">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="baseSize">
           <size>
            <width>0</width>
@@ -95,49 +101,122 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QPushButton" name="view_toggle">
-         <property name="toolTip">
-          <string>切换到歌词视图</string>
+        <widget class="QLabel" name="album_cover">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>80</width>
+           <height>80</height>
+          </size>
          </property>
          <property name="text">
           <string/>
          </property>
-         <property name="icon">
-          <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
-           <normaloff>:/assets/material-symbols--lyrics-outline-rounded.png</normaloff>:/assets/material-symbols--lyrics-outline-rounded.png</iconset>
+         <property name="pixmap">
+          <pixmap resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">:/assets/material-symbols-music-cast-rounded.png</pixmap>
          </property>
-         <property name="iconSize">
-          <size>
-           <width>40</width>
-           <height>40</height>
-          </size>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="play_mode">
+        <widget class="QLabel" name="metadata">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <property name="toolTip">
-          <string>顺序播放</string>
+          <string>歌曲信息</string>
          </property>
          <property name="text">
-          <string/>
+          <string>未在播放</string>
          </property>
-         <property name="icon">
-          <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
-           <normaloff>:/assets/material-symbols--playlist-play-rounded.png</normaloff>:/assets/material-symbols--playlist-play-rounded.png</iconset>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
-         <property name="iconSize">
-          <size>
-           <width>40</width>
-           <height>40</height>
-          </size>
+         <property name="margin">
+          <number>5</number>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="sizeConstraint">
+          <enum>QLayout::SizeConstraint::SetFixedSize</enum>
+         </property>
+         <item>
+          <widget class="QPushButton" name="view_toggle">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>切换到歌词视图</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
+             <normaloff>:/assets/material-symbols--lyrics-outline-rounded.png</normaloff>:/assets/material-symbols--lyrics-outline-rounded.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>40</width>
+             <height>40</height>
+            </size>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="previous_music">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>上一曲</string>
            </property>
@@ -156,53 +235,151 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="play_pause">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>播放</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
+             <normaloff>:/assets/material-symbols--play-arrow-rounded.png</normaloff>:/assets/material-symbols--play-arrow-rounded.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>60</width>
+             <height>60</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="next_music">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>下一曲</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
+             <normaloff>:/assets/material-symbols--skip-next-rounded.png</normaloff>:/assets/material-symbols--skip-next-rounded.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>40</width>
+             <height>40</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="play_mode">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>顺序播放</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
+             <normaloff>:/assets/material-symbols--playlist-play-rounded.png</normaloff>:/assets/material-symbols--playlist-play-rounded.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>40</width>
+             <height>40</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="play_pause">
-         <property name="enabled">
-          <bool>false</bool>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
-         <property name="toolTip">
-          <string>播放</string>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::Expanding</enum>
          </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
-           <normaloff>:/assets/material-symbols--play-arrow-rounded.png</normaloff>:/assets/material-symbols--play-arrow-rounded.png</iconset>
-         </property>
-         <property name="iconSize">
+         <property name="sizeHint" stdset="0">
           <size>
            <width>60</width>
-           <height>60</height>
+           <height>0</height>
           </size>
          </property>
-        </widget>
+        </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="next_music">
+        <widget class="QPushButton" name="mute">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="toolTip">
-          <string>下一曲</string>
+          <string>静音</string>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="icon">
           <iconset resource="build/Desktop_Qt_6_9_1_MSVC2022_64bit-Debug/.qt/rcc/icons.qrc">
-           <normaloff>:/assets/material-symbols--skip-next-rounded.png</normaloff>:/assets/material-symbols--skip-next-rounded.png</iconset>
+           <normaloff>:/assets/material-symbols--volume-up-rounded.png</normaloff>:/assets/material-symbols--volume-up-rounded.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>40</width>
-           <height>40</height>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QSlider" name="volume">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <property name="maximum">
           <number>100</number>
          </property>
@@ -211,31 +388,6 @@
          </property>
          <property name="orientation">
           <enum>Qt::Orientation::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="album_cover">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="artist">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="album">
-         <property name="text">
-          <string/>
          </property>
         </widget>
        </item>
@@ -270,7 +422,6 @@
     </property>
     <addaction name="action_add_file"/>
     <addaction name="action_add_folder"/>
-    <addaction name="action_manage_library"/>
     <addaction name="action_settings"/>
     <addaction name="action_exit"/>
    </widget>
