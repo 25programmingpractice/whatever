@@ -9,10 +9,12 @@
 #include <QMediaPlayer>
 #include <QEventLoop>
 #include <QMediaMetaData>
+#include <QImage>
 
 struct MusicTrack {
     QString filePath, title, artist, album;
     qint64 duration;
+    QImage cover;
 
     MusicTrack(const QString& path) noexcept : filePath(path) {
         QMediaPlayer probe;
@@ -21,6 +23,8 @@ struct MusicTrack {
         QObject::connect(&probe, &QMediaPlayer::metaDataChanged,&loop, &QEventLoop::quit);
         loop.exec();
         duration = probe.duration();
+        cover = probe.metaData().value(QMediaMetaData::CoverArtImage).value<QImage>();
+        if (cover.isNull()) cover = probe.metaData().value(QMediaMetaData::ThumbnailImage).value<QImage>();
         title = probe.metaData().stringValue(QMediaMetaData::Title);
         if (title.isEmpty()) title = QFileInfo(path).baseName();
         artist = probe.metaData().stringValue(QMediaMetaData::Author);
@@ -55,7 +59,7 @@ public:
     void addMusicFile(const QString& filePath) noexcept;
     void addMusicFolder(const QString& folderPath) noexcept;
     void clearPlaylist() noexcept;
-    QString getTrackPath(int index) const noexcept;
+    const MusicTrack* getTrack(int index) const noexcept;
     int getTrackCount() const noexcept;
     void removeTrack(int index) noexcept;
 

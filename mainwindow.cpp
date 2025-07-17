@@ -174,14 +174,13 @@ void MainWindow::nextTrack() noexcept {
 
 void MainWindow::playTrack(int index) noexcept {
     if (index < 0 || index >= playlistModel.getTrackCount()) return;
-    QString filePath = playlistModel.getTrackPath(index);
-    if (!filePath.isEmpty()) {
+    const auto* file = playlistModel.getTrack(index);
+    if (file != nullptr) {
         currentTrackIndex = index;
-        player.setSource(QUrl::fromLocalFile(filePath));
+        player.setSource(QUrl::fromLocalFile(file->filePath));
         player.play();
-        QFileInfo fileInfo(filePath);
+        QFileInfo fileInfo(file->filePath);
         setWindowTitle(fileInfo.baseName() + " - Whatever");
-        setWindowFilePath(filePath);
         ui->music_list->selectRow(index);
         updatePlayingInfo();
     }
@@ -189,13 +188,15 @@ void MainWindow::playTrack(int index) noexcept {
 
 void MainWindow::updatePlayingInfo() noexcept {
     if (currentTrackIndex >= 0 && currentTrackIndex < playlistModel.getTrackCount()) {
-        QString filePath = playlistModel.getTrackPath(currentTrackIndex);
-        QFileInfo fileInfo(filePath);
-        ui->metadata->setText(QString("%1").arg(fileInfo.baseName()));
+        const auto* file = playlistModel.getTrack(currentTrackIndex);
+        ui->metadata->setText(file->artist + " - " + file->title);
         if (isLyricsView) updateLyricsDisplay();
+        if (!file->cover.isNull()) ui->album_cover->setPixmap(QPixmap::fromImage(file->cover).scaled(file->cover.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        else ui->album_cover->setPixmap(QPixmap(":/assets/material-symbols-music-cast-rounded.png"));
     }
     else {
         ui->metadata->setText("未在播放");
+        ui->album_cover->setPixmap(QPixmap(":/assets/material-symbols-music-cast-rounded.png"));
         if (isLyricsView) lyricsDisplay->setPlainText("暂无歌词");
     }
 }
@@ -215,8 +216,9 @@ void MainWindow::toggleView() noexcept {
 
 void MainWindow::updateLyricsDisplay() noexcept {
     if (currentTrackIndex >= 0 && currentTrackIndex < playlistModel.getTrackCount()) {
-        QString filePath = playlistModel.getTrackPath(currentTrackIndex);
-        QString lyrics = loadLyrics(filePath);
+        const auto* file = playlistModel.getTrack(currentTrackIndex);
+        if(file == nullptr) return;
+        QString lyrics = loadLyrics(file->filePath);
         if (lyrics.isEmpty()) lyricsDisplay->setPlainText("暂无歌词");
         else lyricsDisplay->setPlainText(lyrics);
     }

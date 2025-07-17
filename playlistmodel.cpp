@@ -90,9 +90,9 @@ void PlaylistModel::clearPlaylist() noexcept {
     emit playlistChanged();
 }
 
-QString PlaylistModel::getTrackPath(int index) const noexcept {
-    if (index >= 0 && index < m_tracks.size()) return m_tracks.at(index).filePath;
-    return QString();
+const MusicTrack* PlaylistModel::getTrack(int index) const noexcept {
+    if (index >= 0 && index < m_tracks.size()) return &m_tracks.at(index);
+    return nullptr;
 }
 
 int PlaylistModel::getTrackCount() const noexcept {
