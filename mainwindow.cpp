@@ -196,6 +196,15 @@ void MainWindow::playTrack(int index) noexcept {
         player.play();
         QFileInfo fileInfo(file->filePath);
         setWindowTitle(fileInfo.baseName() + " - Whatever");
+        if (QSystemTrayIcon::supportsMessages()) {
+            QIcon smallArt;
+            if(!file->cover.isNull()) {
+                QPixmap temp(QPixmap::fromImage(file->cover));
+                smallArt.addPixmap(temp);
+            }
+            if(smallArt.isNull()) trayIcon.showMessage("正在播放", file->artist + " - " + file->title, QSystemTrayIcon::Information, 2000);
+            else trayIcon.showMessage("正在播放", file->artist + " - " + file->title, smallArt, 5000);
+        }
         ui->music_list->selectRow(index);
         updatePlayingInfo();
     }
