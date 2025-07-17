@@ -27,30 +27,29 @@ private slots:
     void previousTrack() noexcept;
     void nextTrack() noexcept;
     void playTrack(int index) noexcept;
-    void onPlaylistDoubleClicked(const QModelIndex &index);
-    void updateDurationDisplay();
-    void toggleView() noexcept;  // 新增：切换视图
+    void onPlaylistClicked(const QModelIndex& index) noexcept;
+    void updateDurationDisplay() noexcept;
+    void toggleView() noexcept;
 
 private:
-    void setupPlaylist();
-    void setupConnections();
-    void updatePlaybackButtons();
-    void updatePlayingInfo();
-    void setupLyricsView();  // 新增：设置歌词视图
-    void updateLyricsDisplay();  // 新增：更新歌词显示
-    QString loadLyrics(const QString &filePath) const;  // 新增：加载歌词
-    QString formatTime(qint64 milliseconds) const;
+    void setupPlaylist() noexcept;
+    void setupConnections() noexcept;
+    void updatePlaybackButtons() noexcept;
+    void updatePlayingInfo() noexcept;
+    void setupLyricsView() noexcept;
+    void updateLyricsDisplay() noexcept;
+    QString loadLyrics(const QString &filePath) const noexcept;
+    QString formatTime(qint64 milliseconds) const noexcept;
     
     Ui::MainWindow* ui;
     QAudioOutput audio;
     QMediaPlayer player;
     PlaylistModel playlistModel;
     int currentTrackIndex;
-    
-    // 新增：视图切换相关
+
     QStackedWidget* viewStack;
     QTextEdit* lyricsDisplay;
-    bool isLyricsView;  // 当前是否为歌词视图
+    bool isLyricsView;
 };
 
 #endif // MAINWINDOW_H

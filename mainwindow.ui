@@ -148,6 +148,11 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>歌曲信息</string>
          </property>

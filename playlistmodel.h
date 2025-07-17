@@ -45,7 +45,7 @@ public:
         ColumnCount
     };
 
-    explicit PlaylistModel(QObject *parent = nullptr) noexcept;
+    explicit PlaylistModel(QWidget* parent = nullptr) noexcept;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -59,14 +59,19 @@ public:
     int getTrackCount() const noexcept;
     void removeTrack(int index) noexcept;
 
+public slots:
+    bool savePlayList() noexcept;
+    bool loadPlayList() noexcept;
+
 signals:
     void playlistChanged();
 
 private:
+    QString defaultPath() noexcept;
+    QWidget* parent;
     QList<MusicTrack> m_tracks;
     QStringList m_supportedFormats;
-    
-    // 格式化时间的辅助方法
+
     QString formatDuration(qint64 milliseconds) const;
 };
 
