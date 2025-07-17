@@ -1,0 +1,21 @@
+{
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.cmakePath": "/Users/yhx/Qt/Tools/CMake/CMake.app/Contents/bin/cmake",
+    "cmake.configureArgs": [
+        "-DCMAKE_PREFIX_PATH=/Users/yhx/Qt/6.9.1/macos"
+    ],
+    "files.associations": {
+        "*.ui": "xml",
+        "*.qrc": "xml",
+        "*.pro": "qmake",
+        "*.pri": "qmake"
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "terminal.integrated.env.osx": {
+        "QT_DIR": "/Users/yhx/Qt/6.9.1/macos",
+        "CMAKE_PREFIX_PATH": "/Users/yhx/Qt/6.9.1/macos",
+        "PATH": "/Users/yhx/Qt/Tools/CMake/CMake.app/Contents/bin:/Users/yhx/Qt/6.9.1/macos/bin:${env:PATH}"
+    }
+}
