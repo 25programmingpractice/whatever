@@ -32,8 +32,6 @@ MainWindow::MainWindow(QWidget *parent) noexcept :
 
     setupPlaylist();
     setupConnections();
-    
-    //playlistModel.addMusicFolder("");
 }
 
 void MainWindow::setupPlaylist() {

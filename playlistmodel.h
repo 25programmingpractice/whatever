@@ -5,16 +5,34 @@
 #include <QStringList>
 #include <QFileInfo>
 #include <QDir>
+#include <QUrl>
+#include <QMediaPlayer>
+#include <QEventLoop>
+#include <QMediaMetaData>
 
 struct MusicTrack {
-    QString filePath, title, artist, album, duration;
+    QString filePath, title, artist, album;
+    qint64 duration;
 
     MusicTrack(const QString& path) noexcept : filePath(path) {
-        QFileInfo fileInfo(path);
-        title = fileInfo.baseName();
-        artist = "未知艺术家";
-        album = "未知专辑";
-        duration = "0:00";
+        QMediaPlayer probe;
+        probe.setSource(QUrl::fromLocalFile(path));
+        QEventLoop loop;
+        QObject::connect(&probe, &QMediaPlayer::metaDataChanged,&loop, &QEventLoop::quit);
+        loop.exec();
+        duration = probe.duration();
+        title = probe.metaData().stringValue(QMediaMetaData::Title);
+        if (title.isEmpty()) title = QFileInfo(path).baseName();
+        artist = probe.metaData().stringValue(QMediaMetaData::Author);
+        if (artist.isEmpty()){
+            artist = probe.metaData().stringValue(QMediaMetaData::AlbumArtist);
+            if(artist.isEmpty()){
+                artist = probe.metaData().stringValue(QMediaMetaData::ContributingArtist);
+                if(artist.isEmpty()) artist = "未知艺术家";
+            }
+        }
+        album = probe.metaData().stringValue(QMediaMetaData::AlbumTitle);
+        if (album.isEmpty()) album = "未知专辑";
     }
 };
 
@@ -23,11 +41,8 @@ class PlaylistModel : public QAbstractTableModel {
 
 public:
     enum Column {
-        Title = 0,
-        Artist = 1,
-        Album = 2,
-        Duration = 3,
-        ColumnCount = 4
+        Title = 0, Artist, Album, Duration,
+        ColumnCount
     };
 
     explicit PlaylistModel(QObject *parent = nullptr) noexcept;

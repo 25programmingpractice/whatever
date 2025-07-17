@@ -19,42 +19,25 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const {
 }
 
 QVariant PlaylistModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || index.row() >= m_tracks.size())
-        return QVariant();
-
+    if (!index.isValid() || index.row() >= m_tracks.size()) return QVariant();
     const MusicTrack &track = m_tracks.at(index.row());
-
-    if (role == Qt::DisplayRole) {
-        switch (index.column()) {
-        case Title:
-            return track.title;
-        case Artist:
-            return track.artist;
-        case Album:
-            return track.album;
-        case Duration:
-            return track.duration;
-        default:
-            return QVariant();
-        }
+    if (role == Qt::DisplayRole) switch (index.column()) {
+        case Title: return track.title;
+        case Artist: return track.artist;
+        case Album: return track.album;
+        case Duration: return track.duration;
+        default: return QVariant();
     }
     return QVariant();
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        switch (section) {
-        case Title:
-            return tr("标题");
-        case Artist:
-            return tr("艺术家");
-        case Album:
-            return tr("专辑");
-        case Duration:
-            return tr("时长");
-        default:
-            return QVariant();
-        }
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) switch (section) {
+        case Title: return tr("标题");
+        case Artist: return tr("艺术家");
+        case Album: return tr("专辑");
+        case Duration: return tr("时长");
+        default: return QVariant();
     }
     return QVariant();
 }
