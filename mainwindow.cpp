@@ -20,7 +20,9 @@ MainWindow::MainWindow(QWidget* parent) noexcept :
     player(this),
     playlistModel(this),
     currentTrackIndex(-1),
-    isLyricsView(false)
+    isLyricsView(false),
+    muted(false),
+    volume_(50)
 {
     ui->setupUi(this);
     setCentralWidget(ui->central_widget);
@@ -40,6 +42,7 @@ MainWindow::MainWindow(QWidget* parent) noexcept :
     setupPlaylist();
     setupLyricsView();
     setupConnections();
+    setupTray();
 
     updatePlaybackButtons();
 }
@@ -86,7 +89,7 @@ void MainWindow::setupConnections() noexcept {
     connect(ui->play_pause, &QPushButton::clicked, this, &MainWindow::togglePlayback);
     connect(ui->previous_music, &QPushButton::clicked, this, &MainWindow::previousTrack);
     connect(ui->next_music, &QPushButton::clicked, this, &MainWindow::nextTrack);
-    connect(ui->view_toggle, &QPushButton::clicked, this, &MainWindow::toggleView);  // 新增：视图切换
+    connect(ui->view_toggle, &QPushButton::clicked, this, &MainWindow::toggleView);
 
     connect(ui->music_list, &QTableView::clicked, this, &MainWindow::onPlaylistClicked);
 
@@ -128,8 +131,20 @@ void MainWindow::setupConnections() noexcept {
     });
 
     connect(ui->volume, &QSlider::valueChanged, this, [this](int v){
+        if(v > 0 && muted) {
+            muted = false;
+            ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-up-rounded.png"));
+            ui->mute->setToolTip("静音");
+        }
+        else if(v == 0 && !muted) {
+            muted = true;
+            ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-off-rounded.png"));
+            ui->mute->setToolTip("取消静音");
+        }
         audio.setVolume(v / 100.0f);
     });
+
+    connect(ui->mute, &QPushButton::clicked, this, &MainWindow::toggleMuted);
 
     connect(&playlistModel, &QAbstractItemModel::rowsInserted, this, [this](){
         updatePlaybackButtons();
@@ -299,16 +314,68 @@ void MainWindow::updatePlaybackButtons() noexcept {
         ui->play_pause->setEnabled(false);
         ui->play_pause->setIcon(QIcon(":/assets/material-symbols--play-arrow-rounded.png"));
         ui->play_pause->setToolTip("播放");
+        actPlay.setText("播放");
         return;
     }
     ui->play_pause->setEnabled(true);
     if (state == QMediaPlayer::PlayingState) {
         ui->play_pause->setIcon(QIcon(":/assets/material-symbols--pause-rounded.png"));
         ui->play_pause->setToolTip("暂停");
+        actPlay.setText("暂停");
     }
     else {
         ui->play_pause->setIcon(QIcon(":/assets/material-symbols--play-arrow-rounded.png"));
         ui->play_pause->setToolTip("播放");
+        actPlay.setText("播放");
+    }
+}
+
+void MainWindow::setupTray() noexcept {
+    if (!QSystemTrayIcon::isSystemTrayAvailable()) return;
+
+    trayMenu.addAction(&actPrev);
+    trayMenu.addAction(&actPlay);
+    trayMenu.addAction(&actNext);
+    trayIcon.setContextMenu(&trayMenu);
+
+    connect(&actPrev, &QAction::triggered, this, &MainWindow::previousTrack);
+    connect(&actPlay, &QAction::triggered, this, &MainWindow::togglePlayback);
+    connect(&actNext, &QAction::triggered, this, &MainWindow::nextTrack);
+
+    connect(&trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::onTrayActivated);
+
+    trayIcon.setIcon(QIcon(":/assets/material-symbols-music-cast-rounded.png"));
+    trayIcon.setToolTip("Whatever 播放器");
+    trayIcon.show();
+}
+
+void MainWindow::onTrayActivated(QSystemTrayIcon::ActivationReason reason) noexcept {
+    if (reason == QSystemTrayIcon::ActivationReason::Trigger) {
+        if (windowState() & Qt::WindowMinimized) {
+            setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+            show();
+            raise();
+            activateWindow();
+        }
+        else setWindowState(windowState() | Qt::WindowMinimized);
+    }
+}
+
+void MainWindow::toggleMuted() noexcept {
+    if(muted) {
+        muted = false;
+        ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-up-rounded.png"));
+        ui->mute->setToolTip("静音");
+        audio.setVolume(volume_ / 100.0f);
+        ui->volume->setValue(volume_);
+    }
+    else {
+        muted = true;
+        ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-off-rounded.png"));
+        ui->mute->setToolTip("取消静音");
+        volume_ = audio.volume() * 100;
+        audio.setVolume(0.0f);
+        ui->volume->setValue(0);
     }
 }
 

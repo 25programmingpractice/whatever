@@ -11,7 +11,7 @@
 PlaylistModel::PlaylistModel(QWidget* parent) noexcept : QAbstractTableModel(parent), parent(parent) {
     m_supportedFormats << "mp3" << "flac" << "aac" << "wav" << "m4a" << "ogg" << "wma" << "mgg";
     connect(this, &PlaylistModel::playlistChanged, this, &PlaylistModel::savePlayList);
-    qDebug() << defaultPath();
+    qDebug() << "播放列表保存于：" << defaultPath();
 }
 
 int PlaylistModel::rowCount(const QModelIndex& parent) const {
@@ -109,11 +109,11 @@ void PlaylistModel::removeTrack(int index) noexcept {
 }
 
 QString PlaylistModel::formatDuration(qint64 milliseconds) const {
-    if (milliseconds <= 0) return "未知";
+    if (milliseconds <= 0) return "未知时长";
     qint64 seconds = milliseconds / 1000;
     qint64 minutes = seconds / 60;
     seconds = seconds % 60;
-    return tr("%1分%2秒").arg(minutes).arg(seconds, 2, 10, QChar('0'));
+    return tr("%1:%2").arg(minutes).arg(seconds, 2, 10, QChar('0'));
 }
 
 QString PlaylistModel::defaultPath() noexcept {
@@ -133,7 +133,6 @@ bool PlaylistModel::savePlayList() noexcept {
 bool PlaylistModel::loadPlayList() noexcept {
     QFile file{defaultPath()};
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-
     beginResetModel();
     m_tracks.clear();
     QTextStream in{&file};

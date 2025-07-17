@@ -6,6 +6,9 @@
 #include <QAudioOutput>
 #include <QTextEdit>
 #include <QStackedWidget>
+#include <QMenu>
+#include <QSystemTrayIcon>
+
 #include "playlistmodel.h"
 
 QT_BEGIN_NAMESPACE
@@ -30,6 +33,8 @@ private slots:
     void onPlaylistClicked(const QModelIndex& index) noexcept;
     void updateDurationDisplay() noexcept;
     void toggleView() noexcept;
+    void onTrayActivated(QSystemTrayIcon::ActivationReason reason) noexcept;
+    void toggleMuted() noexcept;
 
 private:
     void setupPlaylist() noexcept;
@@ -40,7 +45,8 @@ private:
     void updateLyricsDisplay() noexcept;
     QString loadLyrics(const QString &filePath) const noexcept;
     QString formatTime(qint64 milliseconds) const noexcept;
-    
+    void setupTray() noexcept;
+
     Ui::MainWindow* ui;
     QAudioOutput audio;
     QMediaPlayer player;
@@ -50,6 +56,15 @@ private:
     QStackedWidget* viewStack;
     QTextEdit* lyricsDisplay;
     bool isLyricsView;
+
+    bool muted;
+    int volume_;
+
+    QSystemTrayIcon trayIcon{this};
+    QMenu trayMenu{"播放控制", this};
+    QAction actPrev{"上一曲", &trayMenu};
+    QAction actPlay{"播放", &trayMenu};
+    QAction actNext{"下一曲", &trayMenu};
 };
 
 #endif // MAINWINDOW_H
