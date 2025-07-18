@@ -29,7 +29,7 @@ private slots:
     void showAbout() noexcept;
     void previousTrack() noexcept;
     void nextTrack() noexcept;
-    void playTrack(int index, bool setIndex = true) noexcept;
+    void playTrack(int index) noexcept;
     void onPlaylistClicked(const QModelIndex& index) noexcept;
     void updateDurationDisplay() noexcept;
     void toggleView() noexcept;
@@ -53,7 +53,7 @@ private:
     QAudioOutput audio;
     QMediaPlayer player;
     PlaylistModel playlistModel;
-    int currentTrackIndex;
+    int currentTrackIndex, shuffleIndex;
 
     QStackedWidget viewStack;
     QTextEdit lyricsDisplay;

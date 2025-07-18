@@ -27,7 +27,8 @@ MainWindow::MainWindow(QWidget* parent) noexcept :
     muted(false),
     volume_(50),
     viewStack(this),
-    lyricsDisplay(this)
+    lyricsDisplay(this),
+    shuffleIndex(0)
 {
     ui->setupUi(this);
     setCentralWidget(ui->central_widget);
@@ -113,13 +114,13 @@ void MainWindow::setupConnections() noexcept {
             ui->play_mode->setIcon(QIcon(":/assets/material-symbols--shuffle-rounded.png"));
             ui->play_mode->setToolTip("随机播放");
             playlistModel.shuffle();
+            shuffleIndex = 0;
             break;
         }
         case PlaylistModel::Shuffled:
             playlistModel.playMode = PlaylistModel::Ordered;
             ui->play_mode->setIcon(QIcon(":/assets/material-symbols--playlist-play-rounded.png"));
             ui->play_mode->setToolTip("列表顺序播放");
-            currentTrackIndex = playlistModel.order[currentTrackIndex];
             break;
         }
     });
@@ -212,15 +213,13 @@ void MainWindow::previousTrack() noexcept {
         else playTrack(playlistModel.getTrackCount() - 1);
         break;
     case PlaylistModel::Shuffled:
-        if(playlistModel.shuffleStarted) {
-            if(currentTrackIndex == 0) currentTrackIndex = playlistModel.getTrackCount() - 1;
-            else currentTrackIndex--;
-            playTrack(playlistModel.order[currentTrackIndex], false);
-        }
-        else {
-            playlistModel.shuffleStarted = true;
-            playTrack(playlistModel.order[0]);
-        }
+        int previous;
+        do {
+            if(shuffleIndex == 0) shuffleIndex = playlistModel.order.size() - 1;
+            else shuffleIndex--;
+            previous = playlistModel.order[shuffleIndex];
+        } while(previous > playlistModel.getTrackCount() - 1);
+        playTrack(previous);
         break;
     case PlaylistModel::Looped:
         playTrack(currentTrackIndex);
@@ -236,15 +235,13 @@ void MainWindow::nextTrack() noexcept {
         else playTrack(0);
         break;
     case PlaylistModel::Shuffled:
-        if(playlistModel.shuffleStarted) {
-            if(currentTrackIndex == playlistModel.getTrackCount() - 1) currentTrackIndex = 0;
-            else currentTrackIndex++;
-            playTrack(playlistModel.order[currentTrackIndex], false);
-        }
-        else {
-            playlistModel.shuffleStarted = true;
-            playTrack(playlistModel.order[0]);
-        }
+        int next;
+        do {
+            if(shuffleIndex == playlistModel.order.size() - 1) shuffleIndex = 0;
+            else shuffleIndex++;
+            next = playlistModel.order[shuffleIndex];
+        } while(next > playlistModel.getTrackCount() - 1);
+        playTrack(next);
         break;
     case PlaylistModel::Looped:
         playTrack(currentTrackIndex);
@@ -252,11 +249,11 @@ void MainWindow::nextTrack() noexcept {
     }
 }
 
-void MainWindow::playTrack(int index, bool setIndex) noexcept {
+void MainWindow::playTrack(int index) noexcept {
     if (index < 0 || index >= playlistModel.getTrackCount()) return;
     const auto* file = playlistModel.getTrack(index);
     if (file != nullptr) {
-        if(setIndex) currentTrackIndex = index;
+        currentTrackIndex = index;
         player.setSource(QUrl::fromLocalFile(file->filePath));
         player.play();
         QFileInfo fileInfo(file->filePath);

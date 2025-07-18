@@ -72,7 +72,6 @@ public:
     void shuffle() noexcept;
 
     std::vector<int> order;
-    bool shuffleStarted{false};
 
 public slots:
     bool savePlayList() noexcept;

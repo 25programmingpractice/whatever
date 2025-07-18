@@ -161,5 +161,4 @@ void PlaylistModel::shuffle() noexcept {
     std::random_device rd;
     std::mt19937 rng(rd());
     std::shuffle(order.begin(), order.end(), rng);
-    shuffleStarted = false;
 }
