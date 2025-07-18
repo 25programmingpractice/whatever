@@ -9,6 +9,9 @@
 #include <QTextStream>
 #include <QVBoxLayout>
 #include <QDebug>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QDirIterator>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -386,6 +389,30 @@ void MainWindow::toggleMuted() noexcept {
         audio.setVolume(0.0f);
         ui->volume->setValue(0);
     }
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* ev) noexcept {
+    if (ev->mimeData()->hasUrls()) ev->acceptProposedAction();
+}
+
+
+
+void MainWindow::dropEvent(QDropEvent* ev) noexcept {
+    const auto urls = ev->mimeData()->urls();
+    for (const QUrl &u : urls) {
+        if (!u.isLocalFile()) continue;
+        const QString path = u.toLocalFile();
+        QFileInfo info(path);
+        if (info.isDir()) {
+            QDirIterator it(path, QDir::Files | QDir::NoSymLinks, QDirIterator::Subdirectories);
+            while (it.hasNext()) {
+                const QString file = it.next();
+                playlistModel.addMusicFile(file);
+            }
+        }
+        else playlistModel.addMusicFile(path);
+    }
+    ev->acceptProposedAction();
 }
 
 MainWindow::~MainWindow() {

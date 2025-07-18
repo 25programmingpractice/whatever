@@ -35,6 +35,7 @@ private slots:
     void toggleView() noexcept;
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason) noexcept;
     void toggleMuted() noexcept;
+    void dragEnterEvent(QDragEnterEvent *ev) noexcept;
 
 private:
     void setupPlaylist() noexcept;
@@ -46,6 +47,7 @@ private:
     QString loadLyrics(const QString &filePath) const noexcept;
     QString formatTime(qint64 milliseconds) const noexcept;
     void setupTray() noexcept;
+    void dropEvent(QDropEvent* ev) noexcept;
 
     Ui::MainWindow* ui;
     QAudioOutput audio;

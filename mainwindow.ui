@@ -399,7 +399,11 @@
       </layout>
      </item>
      <item>
-      <widget class="QTableView" name="music_list"/>
+      <widget class="QTableView" name="music_list">
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -410,7 +414,7 @@
      <x>0</x>
      <y>0</y>
      <width>921</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
