@@ -25,7 +25,9 @@ MainWindow::MainWindow(QWidget* parent) noexcept :
     currentTrackIndex(-1),
     isLyricsView(false),
     muted(false),
-    volume_(50)
+    volume_(50),
+    viewStack(this),
+    lyricsDisplay(this)
 {
     ui->setupUi(this);
     setCentralWidget(ui->central_widget);
@@ -72,24 +74,18 @@ void MainWindow::setupPlaylist() noexcept {
 }
 
 void MainWindow::setupLyricsView() noexcept {
-    viewStack = new QStackedWidget(this);
-
-    lyricsDisplay = new QTextEdit(this);
-    lyricsDisplay->setReadOnly(true);
-    lyricsDisplay->setAlignment(Qt::AlignCenter);
-    lyricsDisplay->setPlainText("暂无歌词");
-    lyricsDisplay->setStyleSheet("QTextEdit { font-size: 14px; text-align: center; line-height: 1.5; padding: 20px; }");
-
-    viewStack->addWidget(ui->music_list);
-    viewStack->addWidget(lyricsDisplay);
-
+    lyricsDisplay.setReadOnly(true);
+    lyricsDisplay.setAlignment(Qt::AlignCenter);
+    lyricsDisplay.setPlainText("暂无歌词");
+    lyricsDisplay.setStyleSheet("QTextEdit { font-size: 14px; text-align: center; line-height: 1.5; padding: 20px; }");
+    viewStack.addWidget(ui->music_list);
+    viewStack.addWidget(&lyricsDisplay);
     QVBoxLayout* mainLayout = qobject_cast<QVBoxLayout*>(ui->central_widget->layout());
     if (mainLayout) {
         mainLayout->removeWidget(ui->music_list);
-        mainLayout->addWidget(viewStack);
+        mainLayout->addWidget(&viewStack);
     }
-
-    viewStack->setCurrentWidget(ui->music_list);
+    viewStack.setCurrentWidget(ui->music_list);
 }
 
 void MainWindow::setupConnections() noexcept {
@@ -104,6 +100,29 @@ void MainWindow::setupConnections() noexcept {
     connect(ui->view_toggle, &QPushButton::clicked, this, &MainWindow::toggleView);
 
     connect(ui->music_list, &QTableView::clicked, this, &MainWindow::onPlaylistClicked);
+
+    connect(ui->play_mode, &QPushButton::clicked, this, [this](){
+        switch(playlistModel.playMode) {
+        case PlaylistModel::Ordered:
+            playlistModel.playMode = PlaylistModel::Looped;
+            ui->play_mode->setIcon(QIcon(":/assets/material-symbols--repeat-one-rounded.png"));
+            ui->play_mode->setToolTip("单曲循环");
+            break;
+        case PlaylistModel::Looped: {
+            playlistModel.playMode = PlaylistModel::Shuffled;
+            ui->play_mode->setIcon(QIcon(":/assets/material-symbols--shuffle-rounded.png"));
+            ui->play_mode->setToolTip("随机播放");
+            playlistModel.shuffle();
+            break;
+        }
+        case PlaylistModel::Shuffled:
+            playlistModel.playMode = PlaylistModel::Ordered;
+            ui->play_mode->setIcon(QIcon(":/assets/material-symbols--playlist-play-rounded.png"));
+            ui->play_mode->setToolTip("列表顺序播放");
+            currentTrackIndex = playlistModel.order[currentTrackIndex];
+            break;
+        }
+    });
 
     connect(&player, &QMediaPlayer::durationChanged, this, [this](qint64 d){
         ui->music_progress->setRange(0, int(d));
@@ -187,21 +206,57 @@ void MainWindow::togglePlayback() noexcept {
 
 void MainWindow::previousTrack() noexcept {
     if (playlistModel.getTrackCount() == 0) return;
-    if (currentTrackIndex > 0) playTrack(currentTrackIndex - 1);
-    else playTrack(playlistModel.getTrackCount() - 1);
+    switch(playlistModel.playMode) {
+    case PlaylistModel::Ordered:
+        if (currentTrackIndex > 0) playTrack(currentTrackIndex - 1);
+        else playTrack(playlistModel.getTrackCount() - 1);
+        break;
+    case PlaylistModel::Shuffled:
+        if(playlistModel.shuffleStarted) {
+            if(currentTrackIndex == 0) currentTrackIndex = playlistModel.getTrackCount() - 1;
+            else currentTrackIndex--;
+            playTrack(playlistModel.order[currentTrackIndex], false);
+        }
+        else {
+            playlistModel.shuffleStarted = true;
+            playTrack(playlistModel.order[0]);
+        }
+        break;
+    case PlaylistModel::Looped:
+        playTrack(currentTrackIndex);
+        break;
+    }
 }
 
 void MainWindow::nextTrack() noexcept {
     if (playlistModel.getTrackCount() == 0) return;
-    if (currentTrackIndex < playlistModel.getTrackCount() - 1) playTrack(currentTrackIndex + 1);
-    else playTrack(0);
+    switch(playlistModel.playMode) {
+    case PlaylistModel::Ordered:
+        if (currentTrackIndex < playlistModel.getTrackCount() - 1) playTrack(currentTrackIndex + 1);
+        else playTrack(0);
+        break;
+    case PlaylistModel::Shuffled:
+        if(playlistModel.shuffleStarted) {
+            if(currentTrackIndex == playlistModel.getTrackCount() - 1) currentTrackIndex = 0;
+            else currentTrackIndex++;
+            playTrack(playlistModel.order[currentTrackIndex], false);
+        }
+        else {
+            playlistModel.shuffleStarted = true;
+            playTrack(playlistModel.order[0]);
+        }
+        break;
+    case PlaylistModel::Looped:
+        playTrack(currentTrackIndex);
+        break;
+    }
 }
 
-void MainWindow::playTrack(int index) noexcept {
+void MainWindow::playTrack(int index, bool setIndex) noexcept {
     if (index < 0 || index >= playlistModel.getTrackCount()) return;
     const auto* file = playlistModel.getTrack(index);
     if (file != nullptr) {
-        currentTrackIndex = index;
+        if(setIndex) currentTrackIndex = index;
         player.setSource(QUrl::fromLocalFile(file->filePath));
         player.play();
         QFileInfo fileInfo(file->filePath);
@@ -212,8 +267,8 @@ void MainWindow::playTrack(int index) noexcept {
                 QPixmap temp(QPixmap::fromImage(file->cover));
                 smallArt.addPixmap(temp);
             }
-            if(smallArt.isNull()) trayIcon.showMessage("正在播放", file->artist + " - " + file->title, QSystemTrayIcon::Information, 2000);
-            else trayIcon.showMessage("正在播放", file->artist + " - " + file->title, smallArt, 5000);
+            if(smallArt.isNull()) trayIcon.showMessage("正在播放", file->artist + " - " + file->title, QSystemTrayIcon::Information, 1000);
+            else trayIcon.showMessage("正在播放", file->artist + " - " + file->title, smallArt, 1000);
         }
         ui->music_list->selectRow(index);
         updatePlayingInfo();
@@ -247,19 +302,19 @@ void MainWindow::updatePlayingInfo() noexcept {
     else {
         ui->metadata->setText("未在播放");
         ui->album_cover->setPixmap(QPixmap(":/assets/material-symbols-music-cast-rounded.png"));
-        if (isLyricsView) lyricsDisplay->setPlainText("暂无歌词");
+        if (isLyricsView) lyricsDisplay.setPlainText("暂无歌词");
     }
 }
 
 void MainWindow::toggleView() noexcept {
     isLyricsView = !isLyricsView;
     if (isLyricsView) {
-        viewStack->setCurrentWidget(lyricsDisplay);
+        viewStack.setCurrentWidget(&lyricsDisplay);
         ui->view_toggle->setToolTip("切换到播放列表视图");
         updateLyricsDisplay();
     }
     else {
-        viewStack->setCurrentWidget(ui->music_list);
+        viewStack.setCurrentWidget(ui->music_list);
         ui->view_toggle->setToolTip("切换到歌词视图");
     }
 }
@@ -269,10 +324,10 @@ void MainWindow::updateLyricsDisplay() noexcept {
         const auto* file = playlistModel.getTrack(currentTrackIndex);
         if(file == nullptr) return;
         QString lyrics = loadLyrics(file->filePath);
-        if (lyrics.isEmpty()) lyricsDisplay->setPlainText("暂无歌词");
-        else lyricsDisplay->setPlainText(lyrics);
+        if (lyrics.isEmpty()) lyricsDisplay.setPlainText("暂无歌词");
+        else lyricsDisplay.setPlainText(lyrics);
     }
-    else lyricsDisplay->setPlainText("暂无歌词");
+    else lyricsDisplay.setPlainText("暂无歌词");
 }
 
 QString MainWindow::loadLyrics(const QString &filePath) const noexcept {

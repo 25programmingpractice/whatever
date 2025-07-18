@@ -29,7 +29,7 @@ private slots:
     void showAbout() noexcept;
     void previousTrack() noexcept;
     void nextTrack() noexcept;
-    void playTrack(int index) noexcept;
+    void playTrack(int index, bool setIndex = true) noexcept;
     void onPlaylistClicked(const QModelIndex& index) noexcept;
     void updateDurationDisplay() noexcept;
     void toggleView() noexcept;
@@ -55,8 +55,8 @@ private:
     PlaylistModel playlistModel;
     int currentTrackIndex;
 
-    QStackedWidget* viewStack;
-    QTextEdit* lyricsDisplay;
+    QStackedWidget viewStack;
+    QTextEdit lyricsDisplay;
     bool isLyricsView;
 
     bool muted;

@@ -1,6 +1,8 @@
 #ifndef PLAYLISTMODEL_H
 #define PLAYLISTMODEL_H
 
+#include <vector>
+
 #include <QAbstractTableModel>
 #include <QStringList>
 #include <QFileInfo>
@@ -50,6 +52,10 @@ public:
         ColumnCount
     };
 
+    enum PlayMode : uint8_t {
+        Ordered, Looped, Shuffled
+    } playMode{PlayMode::Ordered};
+
     explicit PlaylistModel(QWidget* parent = nullptr) noexcept;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -63,6 +69,10 @@ public:
     const MusicTrack* getTrack(int index) const noexcept;
     int getTrackCount() const noexcept;
     void removeTrack(int index) noexcept;
+    void shuffle() noexcept;
+
+    std::vector<int> order;
+    bool shuffleStarted{false};
 
 public slots:
     bool savePlayList() noexcept;

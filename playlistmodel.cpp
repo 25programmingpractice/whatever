@@ -1,3 +1,7 @@
+#include <algorithm>
+#include <random>
+#include <vector>
+
 #include <QDir>
 #include <QFileInfo>
 #include <QMimeData>
@@ -149,4 +153,13 @@ bool PlaylistModel::loadPlayList() noexcept {
     endResetModel();
     emit playlistChanged();
     return true;
+}
+
+void PlaylistModel::shuffle() noexcept {
+    order = std::vector<int>(m_tracks.size());
+    std::iota(order.begin(), order.end(), 0);
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::shuffle(order.begin(), order.end(), rng);
+    shuffleStarted = false;
 }
