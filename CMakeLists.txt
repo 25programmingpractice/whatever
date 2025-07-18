@@ -67,6 +67,7 @@ qt_add_resources(whatever icons
         assets/material-symbols--skip-previous-rounded.png
         assets/material-symbols--volume-off-rounded.png
         assets/material-symbols--volume-up-rounded.png
+        assets/material-symbols--delete-forever-rounded.png
 )
 
 target_link_libraries(whatever PRIVATE

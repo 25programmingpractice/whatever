@@ -10,6 +10,7 @@
 #include <QEventLoop>
 #include <QMediaMetaData>
 #include <QImage>
+#include <QStyledItemDelegate>
 
 struct MusicTrack {
     QString filePath, title, artist, album;
@@ -45,7 +46,7 @@ class PlaylistModel : public QAbstractTableModel {
 
 public:
     enum Column {
-        Title = 0, Artist, Album, Duration,
+        Delete = 0, Title, Artist, Album, Duration,
         ColumnCount
     };
 
@@ -72,11 +73,26 @@ signals:
 
 private:
     QString defaultPath() noexcept;
+    QString formatDuration(qint64 milliseconds) const noexcept;
+
     QWidget* parent;
     QList<MusicTrack> m_tracks;
     QStringList m_supportedFormats;
+};
 
-    QString formatDuration(qint64 milliseconds) const;
+
+class CenterIconDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+    void initStyleOption(QStyleOptionViewItem* opt, const QModelIndex& idx) const override {
+        QStyledItemDelegate::initStyleOption(opt, idx);
+        if (idx.column() == PlaylistModel::Delete) {
+            opt->decorationAlignment = Qt::AlignCenter;
+            opt->decorationPosition = QStyleOptionViewItem::Left;
+            opt->decorationSize = opt->rect.size() / 1.25f;
+        }
+    }
 };
 
 #endif // PLAYLISTMODEL_H

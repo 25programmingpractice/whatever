@@ -47,6 +47,7 @@ MainWindow::MainWindow(QWidget* parent) noexcept :
     setupConnections();
     setupTray();
 
+    playlistModel.loadPlayList();
     updatePlaybackButtons();
 }
 
@@ -55,11 +56,19 @@ void MainWindow::setupPlaylist() noexcept {
     ui->music_list->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->music_list->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->music_list->setAlternatingRowColors(true);
-
-    ui->music_list->setColumnWidth(0, 300);
-    ui->music_list->setColumnWidth(1, 150);
-    ui->music_list->setColumnWidth(2, 150);
-    ui->music_list->setColumnWidth(3, 80);
+    ui->music_list->setItemDelegateForColumn(PlaylistModel::Delete, new CenterIconDelegate(ui->music_list));
+    auto* header = ui->music_list->horizontalHeader();
+    header->setSectionResizeMode(PlaylistModel::Delete, QHeaderView::Fixed);
+    header->setSectionResizeMode(PlaylistModel::Title, QHeaderView::Stretch);
+    header->setSectionResizeMode(PlaylistModel::Artist, QHeaderView::Stretch);
+    header->setSectionResizeMode(PlaylistModel::Album, QHeaderView::Stretch);
+    header->setSectionResizeMode(PlaylistModel::Duration, QHeaderView::Fixed);
+    header->resizeSection(PlaylistModel::Delete, 30);
+    header->resizeSection(PlaylistModel::Title, 4);
+    header->resizeSection(PlaylistModel::Artist, 3);
+    header->resizeSection(PlaylistModel::Album, 3);
+    header->resizeSection(PlaylistModel::Duration, 80);
+    header->setStretchLastSection(false);
 }
 
 void MainWindow::setupLyricsView() noexcept {
@@ -69,7 +78,7 @@ void MainWindow::setupLyricsView() noexcept {
     lyricsDisplay->setReadOnly(true);
     lyricsDisplay->setAlignment(Qt::AlignCenter);
     lyricsDisplay->setPlainText("暂无歌词");
-    lyricsDisplay->setStyleSheet("QTextEdit { font-size: 14px; line-height: 1.5; padding: 20px; }");
+    lyricsDisplay->setStyleSheet("QTextEdit { font-size: 14px; text-align: center; line-height: 1.5; padding: 20px; }");
 
     viewStack->addWidget(ui->music_list);
     viewStack->addWidget(lyricsDisplay);
@@ -113,8 +122,6 @@ void MainWindow::setupConnections() noexcept {
     connect(&player, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state){
         updatePlaybackButtons();
     });
-
-    playlistModel.loadPlayList();
 
     connect(ui->music_progress, &QSlider::sliderMoved, &player, &QMediaPlayer::setPosition);
 
@@ -223,7 +230,7 @@ void MainWindow::updatePlayingInfo() noexcept {
             bool found = false;
             const QDir dir{QFileInfo(file->filePath).absolutePath()};
             static const QStringList names = { "cover.jpg", "Cover.jpg", "folder.jpg", "Folder.jpg" };
-            for (const QString &n : names) {
+            for (const QString& n : names) {
                 const QString file_ = dir.filePath(n);
                 if (QFile::exists(file_)) {
                     QImage img(file_);
@@ -298,8 +305,11 @@ QString MainWindow::loadLyrics(const QString &filePath) const noexcept {
     return QString();
 }
 
-void MainWindow::onPlaylistClicked(const QModelIndex &index) noexcept {
-    if (index.isValid()) playTrack(index.row());
+void MainWindow::onPlaylistClicked(const QModelIndex& index) noexcept {
+    if (index.isValid()) {
+        if(index.column() == PlaylistModel::Delete) playlistModel.removeTrack(index.row());
+        else playTrack(index.row());
+    }
 }
 
 void MainWindow::updateDurationDisplay() noexcept {
@@ -395,11 +405,9 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* ev) noexcept {
     if (ev->mimeData()->hasUrls()) ev->acceptProposedAction();
 }
 
-
-
 void MainWindow::dropEvent(QDropEvent* ev) noexcept {
     const auto urls = ev->mimeData()->urls();
-    for (const QUrl &u : urls) {
+    for (const auto& u : urls) {
         if (!u.isLocalFile()) continue;
         const QString path = u.toLocalFile();
         QFileInfo info(path);

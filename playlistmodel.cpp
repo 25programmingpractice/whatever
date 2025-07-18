@@ -5,6 +5,7 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QPushButton>
 
 #include "playlistmodel.h"
 
@@ -26,19 +27,23 @@ int PlaylistModel::columnCount(const QModelIndex& parent) const {
 
 QVariant PlaylistModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || index.row() >= m_tracks.size()) return QVariant();
-    const MusicTrack &track = m_tracks.at(index.row());
+    const MusicTrack& track = m_tracks.at(index.row());
     if (role == Qt::DisplayRole) switch (index.column()) {
+        case Delete: return {};
         case Title: return track.title;
         case Artist: return track.artist;
         case Album: return track.album;
         case Duration: return formatDuration(track.duration);
         default: return QVariant();
     }
+    else if (role == Qt::DecorationRole && index.column() == Delete) return QIcon(":/assets/material-symbols--delete-forever-rounded.png");
+    else if (role == Qt::ToolTipRole && index.column() == Delete) return "从库中移除音乐";
     return QVariant();
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) switch (section) {
+    if (role == Qt::DisplayRole) switch (section) {
+        case Delete: return "";
         case Title: return "标题";
         case Artist: return "艺术家";
         case Album: return "专辑";
@@ -108,7 +113,7 @@ void PlaylistModel::removeTrack(int index) noexcept {
     }
 }
 
-QString PlaylistModel::formatDuration(qint64 milliseconds) const {
+QString PlaylistModel::formatDuration(qint64 milliseconds) const noexcept {
     if (milliseconds <= 0) return "未知时长";
     qint64 seconds = milliseconds / 1000;
     qint64 minutes = seconds / 60;
