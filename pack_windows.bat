@@ -1,0 +1,2 @@
+makensis windows.nsi
+pause

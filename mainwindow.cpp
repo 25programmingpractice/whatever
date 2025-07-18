@@ -102,86 +102,24 @@ void MainWindow::setupConnections() noexcept {
 
     connect(ui->music_list, &QTableView::clicked, this, &MainWindow::onPlaylistClicked);
 
-    connect(ui->play_mode, &QPushButton::clicked, this, [this](){
-        switch(playlistModel.playMode) {
-        case PlaylistModel::Ordered:
-            playlistModel.playMode = PlaylistModel::Looped;
-            ui->play_mode->setIcon(QIcon(":/assets/material-symbols--repeat-one-rounded.png"));
-            ui->play_mode->setToolTip("单曲循环");
-            break;
-        case PlaylistModel::Looped: {
-            playlistModel.playMode = PlaylistModel::Shuffled;
-            ui->play_mode->setIcon(QIcon(":/assets/material-symbols--shuffle-rounded.png"));
-            ui->play_mode->setToolTip("随机播放");
-            playlistModel.shuffle();
-            shuffleIndex = 0;
-            break;
-        }
-        case PlaylistModel::Shuffled:
-            playlistModel.playMode = PlaylistModel::Ordered;
-            ui->play_mode->setIcon(QIcon(":/assets/material-symbols--playlist-play-rounded.png"));
-            ui->play_mode->setToolTip("列表顺序播放");
-            break;
-        }
-    });
+    connect(ui->play_mode, &QPushButton::clicked, this, &MainWindow::playModeClicked);
 
-    connect(&player, &QMediaPlayer::durationChanged, this, [this](qint64 d){
-        ui->music_progress->setRange(0, int(d));
-        updateDurationDisplay();
-    });
-
-    connect(&player, &QMediaPlayer::positionChanged, this, [this](qint64 p){
-        ui->music_progress->setValue(int(p));
-        ui->current_duration->setText(formatTime(p));
-    });
-
-    connect(&player, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status){
-        if (status == QMediaPlayer::EndOfMedia) nextTrack();
-    });
-
-    connect(&player, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state){
-        updatePlaybackButtons();
-    });
+    connect(&player, &QMediaPlayer::durationChanged, this, &MainWindow::playerDurationChanged);
+    connect(&player, &QMediaPlayer::positionChanged, this, &MainWindow::playerPositionChanged);
+    connect(&player, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::playerMediaStatusChanged);
+    connect(&player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::updatePlaybackButtons);
 
     connect(ui->music_progress, &QSlider::sliderMoved, &player, &QMediaPlayer::setPosition);
+    connect(ui->music_progress, &QSlider::sliderPressed, this, &MainWindow::musicProgressPressed);
+    connect(ui->music_progress, &QSlider::sliderReleased, this, &MainWindow::musicProgressReleased);
+    connect(ui->music_progress, &QSlider::valueChanged, this, &MainWindow::musicProgressValueChanged);
 
-    connect(ui->music_progress, &QSlider::sliderPressed, this, [this](){
-        disconnect(&player, &QMediaPlayer::positionChanged, this, nullptr);
-    });
-
-    connect(ui->music_progress, &QSlider::sliderReleased, this, [this](){
-        player.setPosition(ui->music_progress->value());
-        connect(&player, &QMediaPlayer::positionChanged, this, [this](qint64 p){
-            ui->music_progress->setValue(int(p));
-            ui->current_duration->setText(formatTime(p));
-        });
-    });
-    connect(ui->music_progress, &QSlider::valueChanged, this, [this](int value){
-        ui->current_duration->setText(formatTime(value));
-    });
-
-    connect(ui->volume, &QSlider::valueChanged, this, [this](int v){
-        if(v > 0 && muted) {
-            muted = false;
-            ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-up-rounded.png"));
-            ui->mute->setToolTip("静音");
-        }
-        else if(v == 0 && !muted) {
-            muted = true;
-            ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-off-rounded.png"));
-            ui->mute->setToolTip("取消静音");
-        }
-        audio.setVolume(v / 100.0f);
-    });
+    connect(ui->volume, &QSlider::valueChanged, this, &MainWindow::volumeChanged);
 
     connect(ui->mute, &QPushButton::clicked, this, &MainWindow::toggleMuted);
 
-    connect(&playlistModel, &QAbstractItemModel::rowsInserted, this, [this](){
-        updatePlaybackButtons();
-    });
-    connect(&playlistModel, &QAbstractItemModel::rowsRemoved, this, [this](){
-        updatePlaybackButtons();
-    });
+    connect(&playlistModel, &QAbstractItemModel::rowsInserted, this, &MainWindow::updatePlaybackButtons);
+    connect(&playlistModel, &QAbstractItemModel::rowsRemoved, this, &MainWindow::updatePlaybackButtons);
 }
 
 void MainWindow::openFile() noexcept {
@@ -377,9 +315,7 @@ QString MainWindow::formatTime(qint64 milliseconds) const noexcept {
 }
 
 void MainWindow::showAbout() noexcept{
-    QMessageBox::about(this, "Whatever 播放器",
-        "<div style='text-align: center'><h1>做点啥呢？Whatever.</h1><h2>2025 编程实训项目</h2><h2>组员：林峻茗、张峻鸣、易治行</h2></div><div><a href='https://github.com/25programmingpractice/whatever'>https://github.com/25programmingpractice/whatever</a></div>"
-    );
+    QMessageBox::about(this, "Whatever 播放器", "<div style='text-align: center'><h1>做点啥呢？Whatever.</h1><h2>2025 编程实训项目</h2><h2>组员：林峻茗、张峻鸣、易治行</h2></div><div><a href='https://github.com/25programmingpractice/whatever'>https://github.com/25programmingpractice/whatever</a></div>");
 }
 
 void MainWindow::updatePlaybackButtons() noexcept {
@@ -473,6 +409,73 @@ void MainWindow::dropEvent(QDropEvent* ev) noexcept {
         else playlistModel.addMusicFile(path);
     }
     ev->acceptProposedAction();
+}
+
+void MainWindow::playModeClicked() noexcept {
+    switch(playlistModel.playMode) {
+    case PlaylistModel::Ordered:
+        playlistModel.playMode = PlaylistModel::Looped;
+        ui->play_mode->setIcon(QIcon(":/assets/material-symbols--repeat-one-rounded.png"));
+        ui->play_mode->setToolTip("单曲循环");
+        break;
+    case PlaylistModel::Looped: {
+        playlistModel.playMode = PlaylistModel::Shuffled;
+        ui->play_mode->setIcon(QIcon(":/assets/material-symbols--shuffle-rounded.png"));
+        ui->play_mode->setToolTip("随机播放");
+        playlistModel.shuffle();
+        shuffleIndex = 0;
+        break;
+    }
+    case PlaylistModel::Shuffled:
+        playlistModel.playMode = PlaylistModel::Ordered;
+        ui->play_mode->setIcon(QIcon(":/assets/material-symbols--playlist-play-rounded.png"));
+        ui->play_mode->setToolTip("列表顺序播放");
+        break;
+    }
+}
+
+void MainWindow::playerDurationChanged(qint64 d) noexcept {
+    ui->music_progress->setRange(0, int(d));
+    updateDurationDisplay();
+}
+
+void MainWindow::playerPositionChanged(qint64 p) noexcept {
+    ui->music_progress->setValue(int(p));
+    ui->current_duration->setText(formatTime(p));
+}
+
+void MainWindow::playerMediaStatusChanged(QMediaPlayer::MediaStatus status) noexcept {
+    if (status == QMediaPlayer::EndOfMedia) nextTrack();
+}
+
+void MainWindow::musicProgressPressed() noexcept {
+    disconnect(&player, &QMediaPlayer::positionChanged, this, nullptr);
+}
+
+void MainWindow::musicProgressReleased() noexcept {
+    player.setPosition(ui->music_progress->value());
+    connect(&player, &QMediaPlayer::positionChanged, this, [this](qint64 p){
+        ui->music_progress->setValue(int(p));
+        ui->current_duration->setText(formatTime(p));
+    });
+}
+
+void MainWindow::musicProgressValueChanged(int value) noexcept {
+    ui->current_duration->setText(formatTime(value));
+}
+
+void MainWindow::volumeChanged(int v) noexcept {
+    if(v > 0 && muted) {
+        muted = false;
+        ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-up-rounded.png"));
+        ui->mute->setToolTip("静音");
+    }
+    else if(v == 0 && !muted) {
+        muted = true;
+        ui->mute->setIcon(QIcon(":/assets/material-symbols--volume-off-rounded.png"));
+        ui->mute->setToolTip("取消静音");
+    }
+    audio.setVolume(v / 100.0f);
 }
 
 MainWindow::~MainWindow() {

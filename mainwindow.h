@@ -48,6 +48,14 @@ private:
     QString formatTime(qint64 milliseconds) const noexcept;
     void setupTray() noexcept;
     void dropEvent(QDropEvent* ev) noexcept;
+    void playModeClicked() noexcept;
+    void playerDurationChanged(qint64 d) noexcept;
+    void playerPositionChanged(qint64 p) noexcept;
+    void playerMediaStatusChanged(QMediaPlayer::MediaStatus status) noexcept;
+    void musicProgressPressed() noexcept;
+    void musicProgressReleased() noexcept;
+    void musicProgressValueChanged(int value) noexcept;
+    void volumeChanged(int v) noexcept;
 
     Ui::MainWindow* ui;
     QAudioOutput audio;
