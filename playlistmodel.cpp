@@ -14,22 +14,34 @@
 #include "playlistmodel.h"
 
 PlaylistModel::PlaylistModel(QWidget* parent) noexcept : QAbstractTableModel(parent), parent(parent) {
+    /*
+     * 支持的音乐格式列表
+     */
     m_supportedFormats << "mp3" << "flac" << "aac" << "wav" << "m4a" << "ogg" << "wma" << "mgg";
     connect(this, &PlaylistModel::playlistChanged, this, &PlaylistModel::savePlayList);
     qDebug() << "播放列表保存于：" << defaultPath();
 }
 
 int PlaylistModel::rowCount(const QModelIndex& parent) const {
+    /*
+     * 返回播放列表中的音乐数量
+     */
     Q_UNUSED(parent)
     return m_tracks.size();
 }
 
 int PlaylistModel::columnCount(const QModelIndex& parent) const {
+    /*
+     * 返回播放列表的列数
+     */
     Q_UNUSED(parent)
     return ColumnCount;
 }
 
 QVariant PlaylistModel::data(const QModelIndex& index, int role) const {
+    /*
+     * 返回播放列表中指定索引的音乐数据
+     */
     if (!index.isValid() || index.row() >= m_tracks.size()) return QVariant();
     const MusicTrack& track = m_tracks.at(index.row());
     if (role == Qt::DisplayRole) switch (index.column()) {
@@ -46,6 +58,9 @@ QVariant PlaylistModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    /*
+     * 返回播放列表表头数据
+     */
     if (role == Qt::DisplayRole) switch (section) {
         case Delete: return "";
         case Title: return "标题";
@@ -58,6 +73,9 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int
 }
 
 void PlaylistModel::addMusicFile(const QString& filePath) noexcept {
+    /*
+     * 添加单个音乐文件到播放列表
+     */
     QFileInfo fileInfo(filePath);
     if (fileInfo.exists() && m_supportedFormats.contains(fileInfo.suffix().toLower())) {
         for(int i = 0; i < m_tracks.size(); i++) if(m_tracks[i].filePath == filePath) {
@@ -72,6 +90,9 @@ void PlaylistModel::addMusicFile(const QString& filePath) noexcept {
 }
 
 void PlaylistModel::addMusicFolder(const QString& folderPath) noexcept {
+    /*
+     * 从指定文件夹中添加所有支持格式的音乐文件到播放列表
+     */
     QDir dir(folderPath);
     if (!dir.exists()) return;
     QStringList filters;
@@ -93,6 +114,9 @@ void PlaylistModel::addMusicFolder(const QString& folderPath) noexcept {
 }
 
 void PlaylistModel::clearPlaylist() noexcept {
+    /*
+     * 清空播放列表中的所有音乐
+     */
     beginResetModel();
     m_tracks.clear();
     endResetModel();
@@ -100,15 +124,24 @@ void PlaylistModel::clearPlaylist() noexcept {
 }
 
 const MusicTrack* PlaylistModel::getTrack(int index) const noexcept {
+    /*
+     * 返回指定索引的音乐信息
+     */
     if (index >= 0 && index < m_tracks.size()) return &m_tracks.at(index);
     return nullptr;
 }
 
 int PlaylistModel::getTrackCount() const noexcept {
+    /*
+     * 返回播放列表中的音乐数量
+     */
     return m_tracks.size();
 }
 
 void PlaylistModel::removeTrack(int index) noexcept {
+    /*
+     * 从播放列表中移除指定索引的音乐
+     */
     if (index >= 0 && index < m_tracks.size()) {
         beginRemoveRows(QModelIndex(), index, index);
         m_tracks.removeAt(index);
@@ -118,6 +151,9 @@ void PlaylistModel::removeTrack(int index) noexcept {
 }
 
 QString PlaylistModel::formatDuration(qint64 milliseconds) const noexcept {
+    /*
+     * 将毫秒转换为分钟:秒格式的字符串
+     */
     if (milliseconds <= 0) return "未知时长";
     qint64 seconds = milliseconds / 1000;
     qint64 minutes = seconds / 60;
@@ -126,12 +162,18 @@ QString PlaylistModel::formatDuration(qint64 milliseconds) const noexcept {
 }
 
 QString PlaylistModel::defaultPath() noexcept {
+    /*
+     * 获取默认的播放列表保存路径
+     */
     const QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir{}.mkpath(dir);
     return dir + "/playlist.txt";
 }
 
 bool PlaylistModel::savePlayList() noexcept {
+    /*
+     * 将当前播放列表保存到默认路径
+     */
     QSaveFile file{defaultPath()};
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return false;
     QTextStream out{&file};
@@ -140,6 +182,9 @@ bool PlaylistModel::savePlayList() noexcept {
 }
 
 bool PlaylistModel::loadPlayList() noexcept {
+    /*
+     * 从默认路径加载播放列表
+     */
     QFile file{defaultPath()};
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
     beginResetModel();
@@ -156,6 +201,9 @@ bool PlaylistModel::loadPlayList() noexcept {
 }
 
 void PlaylistModel::shuffle() noexcept {
+    /*
+     * 随机打乱播放列表中的音乐顺序
+     */
     order = std::vector<int>(m_tracks.size());
     std::iota(order.begin(), order.end(), 0);
     std::random_device rd;
